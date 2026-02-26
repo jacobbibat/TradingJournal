@@ -2,8 +2,12 @@
 <html>
 <head>
     <title>Polls</title>
+        {% load static %}
+    <link rel="stylesheet" type="text/css" 
+    href="{% static 'polls/style.css' %}">
 </head>
 <body>
+    <img src="{% static 'polls/django.png' %}" alt="Django Logo" width="100">
     <h1>Latest Questions</h1>
 
     {% if latest_question_list %}
