@@ -1,0 +1,15 @@
+<h1>Review Trade</h1>
+
+<p><strong>Asset:</strong> {{ trade.asset.symbol }}</p>
+<p><strong>Type:</strong> {{ trade.trade_type }}</p>
+<p><strong>Trader:</strong> {{ trade.trader.username }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Review</button>
+</form>
+
+<p>
+    <a href="{% url 'trade_detail' trade.id %}">Back to Trade</a>
+</p>

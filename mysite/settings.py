@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["jacobbibat24.pythonanywhere.com", "127.0.0.1"]
 
+# Registration links
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/tracker/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 # Application definition
 

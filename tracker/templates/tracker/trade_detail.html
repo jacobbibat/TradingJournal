@@ -42,6 +42,26 @@
     <button type="submit">Post Comment</button>
 </form>
 
+<h2>Analyst Reviews</h2>
+
+{% if trade.reviews.all %}
+    {% for review in trade.reviews.all %}
+        <p>
+            <strong>{{ review.analyst.username }}</strong>
+            ({{ review.review_type }}):
+            {{ review.feedback }}
+            <br>
+            <small>{{ review.created_at }}</small>
+        </p>
+    {% endfor %}
+{% else %}
+    <p>No analyst reviews yet.</p>
+{% endif %}
+
+<p>
+    <a href="{% url 'review_trade' trade.id %}">Review this Trade</a>
+</p>
+
 <p>
     <a href="{% url 'trade_list' %}">Back to Trade History</a>
 </p>

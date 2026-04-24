@@ -5,6 +5,18 @@
 </p>
 
 <p>
+    Current Balance: {{ request.user.current_balance }}
+</p>
+
+<p>
+    <a href="{% url 'update_balance' %}">Update Balance</a>
+</p>
+
+<p>
+    <a href="{% url 'balance_history' %}">Balance History</a>
+</p>
+
+<p>
     <a href="{% url 'public_trades' %}">View Public Trades</a>
 </p>
 

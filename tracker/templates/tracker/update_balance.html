@@ -1,0 +1,16 @@
+<h1>Update Balance</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Update Balance</button>
+</form>
+
+<p>
+    <a href="{% url 'balance_history' %}">View Balance History</a>
+</p>
+
+<p>
+    <a href="{% url 'trade_list' %}">Back to Trade History</a>
+</p>

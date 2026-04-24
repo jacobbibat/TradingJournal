@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from .models import Trade, BalanceHistory
+from .forms import TradeForm, CommentForm, TradeReviewForm, BalanceUpdateForm
+from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
 from .models import Trade
-from .forms import TradeForm, CommentForm, TradeReviewForm
-from django.db.models import Sum, Count, Q
-from .models import Trade, Comment
 
+@login_required
 def trade_list(request):
     trades = Trade.objects.all().order_by('-trade_date')
 
@@ -54,6 +56,7 @@ def trade_detail(request, trade_id):
         'form': form,
     })
 # Method to create a trade , after save, redirects trade_detail
+@login_required
 def trade_create(request):
     if request.method == 'POST':
         form = TradeForm(request.POST)
@@ -98,6 +101,7 @@ def trade_delete(request, trade_id):
         'trade': trade
     })
 
+@login_required
 def dashboard(request):
     trades = Trade.objects.all()
 
@@ -129,3 +133,69 @@ def public_trades(request):
     return render(request, 'tracker/public_trades.html', {
         'trades' : trades
     })
+
+# Analyst functionality
+def review_trade(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id)
+
+    if request.method == 'POST':
+        form = TradeReviewForm(request.POST)
+
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.trade = trade
+            review.analyst = request.user
+            review.save()
+            return redirect('trade_detail', trade_id=trade.id)
+        else:
+            form = TradeReviewForm()
+
+        return render(request, 'tracker/review_trade.html', {
+            'trade' : trade,
+            'form' : form,
+        })
+    
+def update_balance(request):
+    user = request.user # Get current user
+
+    if request.method == "POST":
+        form = BalanceUpdateForm(request.POST) # Check if user POST
+
+        if form.is_valid(): #If form is valid, calculate
+            old_balance = user.current_balance
+            new_balance = form.cleaned_data['new_balance']
+            change_amount = new_balance - old_balance
+
+            # Balance history record
+            BalanceHistory.objects.create( 
+                user=user,
+                old_balance=old_balance,
+                new_balance=new_balance,
+                change_amount=change_amount,
+                change_type='ADJUSTMENT',
+                reason=form.cleaned_data['reason']
+            )
+
+            user.current_balance = new_balance
+            user.save()
+
+            return redirect('balance_history')
+        
+        else:
+            #If not, prefill form with current balance
+            form = BalanceUpdateForm(initial={
+                'new_balance' : user.current_balance
+            })
+
+        #render template
+        return render(request, 'tracker/update_balance.html', {
+            'form' : form
+        })
+    
+def balance_history(request):
+    history = BalanceHistory.objects.filter(user=request.user).order_by('-created_at')
+
+    return render(request, 'tracker/balance_history.html', {
+        'history': history
+    })
+

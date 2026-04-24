@@ -1,0 +1,35 @@
+<h1>Balance History</h1>
+
+<p>
+    <a href="{% url 'update_balance' %}">Update Balance</a>
+</p>
+
+<p>
+    <a href="{% url 'trade_list' %}">Back to Trade History</a>
+</p>
+
+{% if history %}
+    <table border="1">
+        <tr>
+            <th>Date</th>
+            <th>Old Balance</th>
+            <th>New Balance</th>
+            <th>Change</th>
+            <th>Type</th>
+            <th>Reason</th>
+        </tr>
+
+        {% for item in history %}
+        <tr>
+            <td>{{ item.created_at }}</td>
+            <td>{{ item.old_balance }}</td>
+            <td>{{ item.new_balance }}</td>
+            <td>{{ item.change_amount }}</td>
+            <td>{{ item.change_type }}</td>
+            <td>{{ item.reason }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No balance changes have been recorded yet.</p>
+{% endif %}
