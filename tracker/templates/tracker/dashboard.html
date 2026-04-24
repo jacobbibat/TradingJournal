@@ -12,3 +12,27 @@
     <li>Total Profit/Loss: {{ total_profit_loss }}</li>
     <li>Win Rate: {{ win_rate }}%</li>
 </ul>
+
+<!-- Script for Chart -->
+ <h2>Win / Loss Chart</h2>
+
+<canvas id="winLossChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const winLossLabels = {{ win_loss_labels|safe }};
+    const winLossData = {{ win_loss_data|safe }};
+
+    const ctx = document.getElementById('winLossChart');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: winLossLabels,
+            datasets: [{
+                data: winLossData
+            }]
+        }
+    });
+</script>

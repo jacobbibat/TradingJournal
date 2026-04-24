@@ -1,11 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Trade, BalanceHistory
+from .models import Trade, BalanceHistory, Asset
 from .forms import TradeForm, CommentForm, TradeReviewForm, BalanceUpdateForm
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 from .decorators import trader_required, analyst_required, admin_required
 from django.contrib.auth import login
-from .forms import RegisterForm
+from .forms import RegisterForm, AssetForm
 from .models import Trade
 
 def register(request):
@@ -23,13 +23,13 @@ def register(request):
     else:
         form = RegisterForm()
 
-    return render(request, 'registration/register.html', {
+    return render(request, 'tracker/register.html', {
         'form': form
     })
 
 @login_required
 def trade_list(request):
-    trades = Trade.objects.all().order_by('-trade_date')
+    trades = Trade.objects.filter(trader=request.user).order_by('-trade_date') # Now only linked to trader who owns it
 
     asset = request.GET.get('asset')
     trade_type = request.GET.get('trade_type')
@@ -55,6 +55,7 @@ def trade_list(request):
         'selected_status': status,
         'selected_visibility': visibility,
     })
+
 @login_required
 def trade_detail(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
@@ -130,7 +131,7 @@ def trade_delete(request, trade_id):
 
 @login_required
 def dashboard(request):
-    trades = Trade.objects.all()
+    trades = Trade.objects.filter(trader=request.user)
 
     total_trades = trades.count()
     closed_trades = trades.filter(status='CLOSED')
@@ -152,6 +153,10 @@ def dashboard(request):
         'losing_trades': losing_trades,
         'total_profit_loss': total_profit_loss,
         'win_rate': round(win_rate, 2),
+
+        # Chart Data
+        'win_loss_labels' : ['Winning Trades', 'Losing Trades'],
+        'win_loss_data' : [winning_trades, losing_trades],
     })
 @login_required
 def public_trades(request):
@@ -187,18 +192,17 @@ def review_trade(request, trade_id):
 @login_required
 @trader_required
 def update_balance(request):
-    user = request.user # Get current user
+    user = request.user
 
     if request.method == "POST":
-        form = BalanceUpdateForm(request.POST) # Check if user POST
+        form = BalanceUpdateForm(request.POST)
 
-        if form.is_valid(): #If form is valid, calculate
+        if form.is_valid():
             old_balance = user.current_balance
             new_balance = form.cleaned_data['new_balance']
             change_amount = new_balance - old_balance
 
-            # Balance history record
-            BalanceHistory.objects.create( 
+            BalanceHistory.objects.create(
                 user=user,
                 old_balance=old_balance,
                 new_balance=new_balance,
@@ -211,17 +215,15 @@ def update_balance(request):
             user.save()
 
             return redirect('balance_history')
-        
-        else:
-            #If not, prefill form with current balance
-            form = BalanceUpdateForm(initial={
-                'new_balance' : user.current_balance
-            })
 
-        #render template
-        return render(request, 'tracker/update_balance.html', {
-            'form' : form
+    else:
+        form = BalanceUpdateForm(initial={
+            'new_balance': user.current_balance
         })
+
+    return render(request, 'tracker/update_balance.html', {
+        'form': form
+    })
     
 @login_required
 @trader_required
@@ -230,5 +232,48 @@ def balance_history(request):
 
     return render(request, 'tracker/balance_history.html', {
         'history': history
+    })
+
+@login_required
+@admin_required
+def asset_list(request):
+    assets = Asset.objects.all().order_by('symbol')
+
+    return render(request, 'tracker/asset_list.html', {
+        'assets': assets
+    })
+
+@login_required
+@admin_required
+def asset_create(request):
+    if request.method == 'POST':
+        form = AssetForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('asset_list')
+    else:
+        form = AssetForm()
+
+    return render(request, 'tracker/asset_form.html', {
+        'form': form
+    })
+
+@login_required
+@admin_required
+def asset_edit(request, asset_id):
+    asset = get_object_or_404(Asset, id=asset_id)
+
+    if request.method == 'POST':
+        form = AssetForm(request.POST, instance=asset)
+
+        if form.is_valid():
+            form.save()
+            return redirect('asset_list')
+    else:
+        form = AssetForm(instance=asset)
+
+    return render(request, 'tracker/asset_form.html', {
+        'form': form
     })
 

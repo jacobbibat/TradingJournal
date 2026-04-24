@@ -1,0 +1,12 @@
+<h1>Asset Form</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Save Asset</button>
+</form>
+
+<p>
+    <a href="{% url 'asset_list' %}">Back to Assets</a>
+</p>

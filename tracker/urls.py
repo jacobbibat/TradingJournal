@@ -9,6 +9,10 @@ urlpatterns = [
     path('public/', views.public_trades, name='public_trades'),
     path('balance/update/', views.update_balance, name='update_balance'),
     path('balance/history/', views.balance_history, name='balance_history'),
+    path('assets/', views.asset_list, name='asset_list'),
+    path('assets/create/', views.asset_create, name='asset_create'),
+    path('assets/<int:asset_id>/edit/', views.asset_edit, name='asset_edit'),
+
     path('<int:trade_id>/', views.trade_detail, name='trade_detail'), #Redirect trade PK
     path('<int:trade_id>/edit/', views.trade_edit, name='trade_edit'), # Edit
     path('<int:trade_id>/delete/', views.trade_delete, name='trade_delete'), #delete
