@@ -1,0 +1,33 @@
+<h1>Manage Assets</h1>
+
+<p>
+    <a href="{% url 'asset_create' %}">Add New Asset</a>
+</p>
+
+<p>
+    <a href="{% url 'trade_list' %}">Back to Trade History</a>
+</p>
+
+{% if assets %}
+    <table border="1">
+        <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Active</th>
+            <th>Action</th>
+        </tr>
+
+        {% for asset in assets %}
+        <tr>
+            <td>{{ asset.symbol }}</td>
+            <td>{{ asset.name }}</td>
+            <td>{{ asset.is_active }}</td>
+            <td>
+                <a href="{% url 'asset_edit' asset.id %}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No assets have been added yet.</p>
+{% endif %}

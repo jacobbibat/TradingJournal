@@ -1,12 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Trade, BalanceHistory, Asset
-from .forms import TradeForm, CommentForm, TradeReviewForm, BalanceUpdateForm
+from .models import Trade, BalanceHistory, Asset, TradeScreenshot
+from .forms import TradeForm, CommentForm, TradeReviewForm, BalanceUpdateForm, RegisterForm, AssetForm, TradeScreenshotForm
 from django.db.models import Sum
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from .decorators import trader_required, analyst_required, admin_required
 from django.contrib.auth import login
-from .forms import RegisterForm, AssetForm
-from .models import Trade
 
 def register(request):
     if request.method == 'POST':
@@ -35,6 +34,8 @@ def trade_list(request):
     trade_type = request.GET.get('trade_type')
     status = request.GET.get('status')
     visibility = request.GET.get('visibility')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
     if asset:
         trades = trades.filter(asset__symbol__icontains=asset)
@@ -47,6 +48,12 @@ def trade_list(request):
 
     if visibility:
         trades = trades.filter(visibility=visibility)
+            
+    if start_date:
+        trades = trades.filter(trade_date__date__gte=start_date)
+
+    if end_date:
+        trades = trades.filter(trade_date__date__lte=end_date)
 
     return render(request, 'tracker/trade_list.html', {
         'trades': trades,
@@ -54,12 +61,17 @@ def trade_list(request):
         'selected_trade_type': trade_type,
         'selected_status': status,
         'selected_visibility': visibility,
+        'selected_start_date' : start_date,
+        'selected_end_date' : end_date,
     })
 
 @login_required
 def trade_detail(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
     comments = trade.comments.all().order_by('-created_at')
+
+    if trade.visibility == 'PRIVATE' and trade.trader != request.user: #Only visible to owner if private
+        return redirect('trade_list')
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -101,7 +113,7 @@ def trade_create(request):
 @login_required
 @trader_required
 def trade_edit(request, trade_id):
-    trade = get_object_or_404(Trade, id=trade_id)
+    trade = get_object_or_404(Trade, id=trade_id, trader=request.user)
 
     if request.method == 'POST':
         form = TradeForm(request.POST, instance=trade)
@@ -119,7 +131,7 @@ def trade_edit(request, trade_id):
 @login_required
 @trader_required
 def trade_delete(request, trade_id): 
-    trade = get_object_or_404(Trade, id=trade_id)
+    trade = get_object_or_404(Trade, id=trade_id, trader=request.user)
 
     if request.method == 'POST': #Only delete if user confirms
         trade.delete() # Delete from db
@@ -181,13 +193,14 @@ def review_trade(request, trade_id):
             review.analyst = request.user
             review.save()
             return redirect('trade_detail', trade_id=trade.id)
-        else:
-            form = TradeReviewForm()
 
-        return render(request, 'tracker/review_trade.html', {
-            'trade' : trade,
-            'form' : form,
-        })
+    else:
+        form = TradeReviewForm()
+
+    return render(request, 'tracker/review_trade.html', {
+        'trade': trade,
+        'form': form,
+    })
 
 @login_required
 @trader_required
@@ -277,3 +290,78 @@ def asset_edit(request, asset_id):
         'form': form
     })
 
+@login_required
+@trader_required
+def upload_screenshot(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id, trader=request.user)
+
+    if request.method == 'POST':
+        form = TradeScreenshotForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            screenshot = form.save(commit=False)
+            screenshot.trade = trade
+            screenshot.save()
+            return redirect('trade_detail', trade_id=trade.id)
+    else:
+        form = TradeScreenshotForm()
+
+    return render(request, 'tracker/upload_screenshot.html', {
+        'form': form,
+        'trade': trade
+    })
+
+@login_required
+@trader_required
+def delete_screenshot(request, screenshot_id):
+    screenshot = get_object_or_404(
+        TradeScreenshot,
+        id=screenshot_id,
+        trade__trader=request.user
+    )
+
+    trade_id = screenshot.trade.id
+
+    if request.method == 'POST':
+        screenshot.delete()
+        return redirect('trade_detail', trade_id=trade_id)
+
+    return render(request, 'tracker/delete_screenshot.html', {
+        'screenshot': screenshot
+    })
+
+@login_required
+def monthly_summary(request):
+    today = timezone.now()
+    month = int(request.GET.get('month', today.month))
+    year = int(request.GET.get('year', today.year))
+
+    trades = Trade.objects.filter(
+        trader=request.user,
+        trade_date__year=year,
+        trade_date__month=month,
+        status='CLOSED'
+    )
+
+    total_trades = trades.count()
+    winning_trades = trades.filter(profit_loss__gt=0).count()
+    losing_trades = trades.filter(profit_loss__lt=0).count()
+
+    total_profit_loss = trades.aggregate(
+        total=Sum('profit_loss')
+    )['total'] or 0
+
+    win_rate = 0
+    if total_trades > 0:
+        win_rate = (winning_trades / total_trades) * 100
+
+    return render(request, 'tracker/monthly_summary.html', {
+        'month': month,
+        'year': year,
+        'trades': trades,
+        'total_trades': total_trades,
+        'winning_trades': winning_trades,
+        'losing_trades': losing_trades,
+        'total_profit_loss': total_profit_loss,
+        'win_rate': round(win_rate, 2),
+    })

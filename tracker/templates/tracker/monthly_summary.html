@@ -1,0 +1,49 @@
+<h1>Monthly Summary</h1>
+
+<form method="get">
+    <label>Month:</label>
+    <input type="number" name="month" min="1" max="12" value="{{ month }}">
+
+    <label>Year:</label>
+    <input type="number" name="year" value="{{ year }}">
+
+    <button type="submit">View Summary</button>
+</form>
+
+<h2>Summary for {{ month }}/{{ year }}</h2>
+
+<ul>
+    <li>Total Closed Trades: {{ total_trades }}</li>
+    <li>Winning Trades: {{ winning_trades }}</li>
+    <li>Losing Trades: {{ losing_trades }}</li>
+    <li>Total Profit/Loss: {{ total_profit_loss }}</li>
+    <li>Win Rate: {{ win_rate }}%</li>
+</ul>
+
+<h2>Trades</h2>
+
+{% if trades %}
+    <table border="1">
+        <tr>
+            <th>Date</th>
+            <th>Asset</th>
+            <th>Type</th>
+            <th>Profit/Loss</th>
+        </tr>
+
+        {% for trade in trades %}
+        <tr>
+            <td>{{ trade.trade_date }}</td>
+            <td>{{ trade.asset.symbol }}</td>
+            <td>{{ trade.trade_type }}</td>
+            <td>{{ trade.profit_loss }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No closed trades found for this month.</p>
+{% endif %}
+
+<p>
+    <a href="{% url 'trade_list' %}">Back to Trade History</a>
+</p>

@@ -52,7 +52,17 @@
 
     <button type="submit">Filter</button>
     <a href="{% url 'trade_list' %}">Clear</a>
+
+    <label>Start Date:</label>
+    <input type="date" name="start_date" value="{{ selected_start_date|default:'' }}">
+
+    <label>End Date:</label>
+    <input type="date" name="end_date" value="{{ selected_end_date|default:'' }}">
 </form>
+
+<p>
+    <a href="{% url 'monthly_summary' %}">Monthly Summary</a>
+</p>
 
 {% if trades %}
     <table border="1">

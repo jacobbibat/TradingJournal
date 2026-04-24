@@ -1,0 +1,14 @@
+<h1>Upload Trade Screenshot</h1>
+
+<p>{{ trade.asset.symbol }} - {{ trade.trade_type }}</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Upload Screenshot</button>
+</form>
+
+<p>
+    <a href="{% url 'trade_detail' trade.id %}">Back to Trade</a>
+</p>

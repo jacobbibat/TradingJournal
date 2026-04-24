@@ -1,5 +1,5 @@
 from django import forms
-from .models import Trade, Comment, TradeReview, BalanceHistory, User, Asset
+from .models import Trade, Comment, TradeReview, BalanceHistory, User, Asset, TradeScreenshot
 
 # Form for creating a Trade with all its fields
 class TradeForm(forms.ModelForm):
@@ -43,3 +43,8 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
         fields = ['symbol', 'name', 'description', 'is_active']
+
+class TradeScreenshotForm(forms.ModelForm):
+    class Meta:
+        model = TradeScreenshot
+        fields = ['image']

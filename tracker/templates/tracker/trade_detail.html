@@ -42,6 +42,25 @@
     <button type="submit">Post Comment</button>
 </form>
 
+<h2>Screenshots</h2>
+
+{% if trade.screenshots.all %}
+{% for screenshot in trade.screenshots.all %}
+    <img src="{{ screenshot.image.url }}" width="300">
+    <form method="post" action="{% url 'delete_screenshot' screenshot.id %}">
+        {% csrf_token %}
+        <button type="submit">Remove Screenshot</button>
+    </form>
+    <br>
+{% endfor %}
+{% else %}
+    <p>No screenshots uploaded.</p>
+{% endif %}
+
+<p>
+    <a href="{% url 'upload_screenshot' trade.id %}">Upload Screenshot</a>
+</p>
+
 <h2>Analyst Reviews</h2>
 
 {% if trade.reviews.all %}
