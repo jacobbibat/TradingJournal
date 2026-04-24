@@ -1,0 +1,77 @@
+<h1>Trade History</h1>
+
+<p>
+    <a href="{% url 'dashboard' %}">Performance Dashboard</a>
+</p>
+
+<p>
+    <a href="{% url 'public_trades' %}">View Public Trades</a>
+</p>
+
+<p>
+    <a href="{% url 'trade_create' %}">Log New Trade</a>
+</p>
+
+
+<form method="get">
+    <label>Asset:</label>
+    <input type="text" name="asset" value="{{ selected_asset|default:'' }}" placeholder="GBPUSD">
+
+    <label>Type:</label>
+    <select name="trade_type">
+        <option value="">All</option>
+        <option value="BUY" {% if selected_trade_type == "BUY" %}selected{% endif %}>Buy</option>
+        <option value="SELL" {% if selected_trade_type == "SELL" %}selected{% endif %}>Sell</option>
+    </select>
+
+    <label>Status:</label>
+    <select name="status">
+        <option value="">All</option>
+        <option value="OPEN" {% if selected_status == "OPEN" %}selected{% endif %}>Open</option>
+        <option value="CLOSED" {% if selected_status == "CLOSED" %}selected{% endif %}>Closed</option>
+    </select>
+
+    <label>Visibility:</label>
+    <select name="visibility">
+        <option value="">All</option>
+        <option value="PRIVATE" {% if selected_visibility == "PRIVATE" %}selected{% endif %}>Private</option>
+        <option value="PUBLIC" {% if selected_visibility == "PUBLIC" %}selected{% endif %}>Public</option>
+    </select>
+
+    <button type="submit">Filter</button>
+    <a href="{% url 'trade_list' %}">Clear</a>
+</form>
+
+{% if trades %}
+    <table border="1">
+        <tr>
+            <th>Trader</th>
+            <th>Asset</th>
+            <th>Type</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>Profit/Loss</th>
+            <th>Status</th>
+        </tr>
+
+        {% for trade in trades %}
+        <tr>
+            <td>{{ trade.trader.username }}</td>
+
+            <td>
+                <a href="{% url 'trade_detail' trade.id %}">
+                    {{ trade.asset.symbol }}
+                </a>
+            </td>
+
+            <td>{{ trade.trade_type }}</td>
+            <td>{{ trade.entry_price }}</td>
+            <td>{{ trade.exit_price }}</td>
+            <td>{{ trade.profit_loss }}</td>
+            <td>{{ trade.status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No trades have been logged yet.</p>
+{% endif %}

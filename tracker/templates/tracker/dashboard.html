@@ -1,0 +1,14 @@
+<h1>Performance Dashboard</h1>
+
+<p><a href="{% url 'trade_list' %}">Back to Trade History</a></p>
+
+<h2>Summary</h2>
+
+<ul>
+    <li>Total Trades: {{ total_trades }}</li>
+    <li>Closed Trades: {{ closed_trades }}</li>
+    <li>Winning Trades: {{ winning_trades }}</li>
+    <li>Losing Trades: {{ losing_trades }}</li>
+    <li>Total Profit/Loss: {{ total_profit_loss }}</li>
+    <li>Win Rate: {{ win_rate }}%</li>
+</ul>

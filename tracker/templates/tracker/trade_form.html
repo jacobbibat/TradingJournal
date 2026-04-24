@@ -1,0 +1,12 @@
+<h1>Log New Trade</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Save Trade</button>
+</form>
+
+<p>
+    <a href="{% url 'trade_list' %}">Back to Trade History</a>
+</p>

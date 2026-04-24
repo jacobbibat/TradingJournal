@@ -1,3 +1,131 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Trade
+from .forms import TradeForm, CommentForm, TradeReviewForm
+from django.db.models import Sum, Count, Q
+from .models import Trade, Comment
 
-# Create your views here.
+def trade_list(request):
+    trades = Trade.objects.all().order_by('-trade_date')
+
+    asset = request.GET.get('asset')
+    trade_type = request.GET.get('trade_type')
+    status = request.GET.get('status')
+    visibility = request.GET.get('visibility')
+
+    if asset:
+        trades = trades.filter(asset__symbol__icontains=asset)
+
+    if trade_type:
+        trades = trades.filter(trade_type=trade_type)
+
+    if status:
+        trades = trades.filter(status=status)
+
+    if visibility:
+        trades = trades.filter(visibility=visibility)
+
+    return render(request, 'tracker/trade_list.html', {
+        'trades': trades,
+        'selected_asset': asset,
+        'selected_trade_type': trade_type,
+        'selected_status': status,
+        'selected_visibility': visibility,
+    })
+
+def trade_detail(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id)
+    comments = trade.comments.all().order_by('-created_at')
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.trade = trade
+            comment.user = request.user
+            comment.save()
+            return redirect('trade_detail', trade_id=trade.id)
+    else:
+        form = CommentForm()
+
+    return render(request, 'tracker/trade_detail.html', {
+        'trade': trade,
+        'comments': comments,
+        'form': form,
+    })
+# Method to create a trade , after save, redirects trade_detail
+def trade_create(request):
+    if request.method == 'POST':
+        form = TradeForm(request.POST)
+
+        if form.is_valid():
+            trade = form.save(commit=False)
+            trade.trader = request.user
+            trade.save()
+            form.save_m2m()
+            return redirect('trade_detail', trade_id=trade.id)
+    else:
+        form = TradeForm()
+
+    return render(request, 'tracker/trade_form.html', {
+        'form': form
+    })
+
+def trade_edit(request, trade_id):
+    trade = get_object_or_404(Trade, id=trade_id)
+
+    if request.method == 'POST':
+        form = TradeForm(request.POST, instance=trade)
+
+        if form.is_valid():
+            form.save()
+            return redirect('trade_detail', trade_id=trade.id)
+    else:
+        form = TradeForm(instance=trade)
+
+    return render(request, 'tracker/trade_form.html', {
+        'form': form
+    })
+
+def trade_delete(request, trade_id): 
+    trade = get_object_or_404(Trade, id=trade_id)
+
+    if request.method == 'POST': #Only delete if user confirms
+        trade.delete() # Delete from db
+        return redirect('trade_list')
+    
+    return render(request, 'tracker/trade_confirm_delete.html', { # If get req, show this page 
+        'trade': trade
+    })
+
+def dashboard(request):
+    trades = Trade.objects.all()
+
+    total_trades = trades.count()
+    closed_trades = trades.filter(status='CLOSED')
+    winning_trades = closed_trades.filter(profit_loss__gt=0).count()
+    losing_trades = closed_trades.filter(profit_loss__lt=0).count()
+
+    total_profit_loss = closed_trades.aggregate(
+        total=Sum('profit_loss')
+    )['total'] or 0
+
+    win_rate = 0
+    if closed_trades.count() > 0:
+        win_rate = (winning_trades / closed_trades.count()) * 100
+
+    return render(request, 'tracker/dashboard.html', {
+        'total_trades': total_trades,
+        'closed_trades': closed_trades.count(),
+        'winning_trades': winning_trades,
+        'losing_trades': losing_trades,
+        'total_profit_loss': total_profit_loss,
+        'win_rate': round(win_rate, 2),
+    })
+
+def public_trades(request):
+    trades = Trade.objects.filter(visibility='PUBLIC').order_by('-trade_date')
+
+    return render(request, 'tracker/public_trades.html', {
+        'trades' : trades
+    })

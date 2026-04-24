@@ -1,0 +1,18 @@
+<h1>Public Trades</h1>
+
+<p><a href="{% url 'trade_list' %}">Back to Trade History</a></p>
+
+{% if trades %}
+    <ul>
+        {% for trade in trades %}
+            <li>
+                <a href="{% url 'trade_detail' trade.id %}">
+                    {{ trade.asset.symbol }} - {{ trade.trade_type }}
+                </a>
+                by {{ trade.trader.username }}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No public trades available.</p>
+{% endif %}
