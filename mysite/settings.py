@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3x)x0p3y2ot%s2*+dk@eq=sb7hz)0f33f&1qn5*e#g-k$j0zv$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["jacobbibat24.pythonanywhere.com"]
+ALLOWED_HOSTS = ["jacobbibat24.pythonanywhere.com", "127.0.0.1"]
 
 
 # Application definition
@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'polls.apps.PollsConfig',
-    'debug_toolbar', #8
+    'debug_toolbar',
+    'tracker', #8
 ]
 
 MIDDLEWARE = [
@@ -74,6 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
+AUTH_USER_MODEL = 'tracker.User'
 
 # Database
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
