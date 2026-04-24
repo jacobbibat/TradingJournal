@@ -3,7 +3,29 @@ from .models import Trade, BalanceHistory
 from .forms import TradeForm, CommentForm, TradeReviewForm, BalanceUpdateForm
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
+from .decorators import trader_required, analyst_required, admin_required
+from django.contrib.auth import login
+from .forms import RegisterForm
 from .models import Trade
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+
+        if form.is_valid(): 
+            user = form.save(commit=False) #Create user object but don't save
+            user.set_password(form.cleaned_data['password'])
+            user.role = 'TRADER'
+            user.save()
+
+            login(request, user)
+            return redirect('trade_list')
+    else:
+        form = RegisterForm()
+
+    return render(request, 'registration/register.html', {
+        'form': form
+    })
 
 @login_required
 def trade_list(request):
@@ -33,7 +55,7 @@ def trade_list(request):
         'selected_status': status,
         'selected_visibility': visibility,
     })
-
+@login_required
 def trade_detail(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
     comments = trade.comments.all().order_by('-created_at')
@@ -57,6 +79,7 @@ def trade_detail(request, trade_id):
     })
 # Method to create a trade , after save, redirects trade_detail
 @login_required
+@trader_required
 def trade_create(request):
     if request.method == 'POST':
         form = TradeForm(request.POST)
@@ -74,6 +97,8 @@ def trade_create(request):
         'form': form
     })
 
+@login_required
+@trader_required
 def trade_edit(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
 
@@ -90,6 +115,8 @@ def trade_edit(request, trade_id):
         'form': form
     })
 
+@login_required
+@trader_required
 def trade_delete(request, trade_id): 
     trade = get_object_or_404(Trade, id=trade_id)
 
@@ -126,7 +153,7 @@ def dashboard(request):
         'total_profit_loss': total_profit_loss,
         'win_rate': round(win_rate, 2),
     })
-
+@login_required
 def public_trades(request):
     trades = Trade.objects.filter(visibility='PUBLIC').order_by('-trade_date')
 
@@ -135,6 +162,8 @@ def public_trades(request):
     })
 
 # Analyst functionality
+@login_required
+@analyst_required
 def review_trade(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
 
@@ -154,7 +183,9 @@ def review_trade(request, trade_id):
             'trade' : trade,
             'form' : form,
         })
-    
+
+@login_required
+@trader_required
 def update_balance(request):
     user = request.user # Get current user
 
@@ -192,6 +223,8 @@ def update_balance(request):
             'form' : form
         })
     
+@login_required
+@trader_required
 def balance_history(request):
     history = BalanceHistory.objects.filter(user=request.user).order_by('-created_at')
 

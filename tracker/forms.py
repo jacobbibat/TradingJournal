@@ -1,5 +1,5 @@
 from django import forms
-from .models import Trade, Comment, TradeReview, BalanceHistory
+from .models import Trade, Comment, TradeReview, BalanceHistory, User
 
 # Form for creating a Trade with all its fields
 class TradeForm(forms.ModelForm):
@@ -31,3 +31,10 @@ class TradeReviewForm(forms.ModelForm):
 class BalanceUpdateForm(forms.Form):
     new_balance = forms.DecimalField(max_digits=12, decimal_places=2)
     reason = forms.CharField(widget=forms.Textarea, required=False)
+
+class RegisterForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
