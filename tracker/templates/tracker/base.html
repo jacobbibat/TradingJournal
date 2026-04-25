@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trading Journal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-200 text-slate-900">
+
+<nav class="bg-slate-900 text-white">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="{% url 'dashboard' %}" class="text-xl font-bold">
+            Trading Journal
+        </a>
+
+        <div class="space-x-4">
+            <a href="{% url 'dashboard' %}" class="hover:text-slate-300">Dashboard</a>
+            <a href="{% url 'trade_list' %}" class="hover:text-slate-300">Trades</a>
+            <a href="{% url 'monthly_summary' %}" class="hover:text-slate-300">Monthly Summary</a>
+
+            {% if user.is_authenticated %}
+                <span class="text-slate-300">Hi, {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="hover:text-slate-300">
+                            Logout
+                        </button>
+                    </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="hover:text-slate-300">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+    {% block content %}
+    {% endblock %}
+</main>
+
+</body>
+</html>

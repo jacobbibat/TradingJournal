@@ -149,11 +149,37 @@ class Trade(models.Model):
         return (self.profit_loss / (self.entry_price * self.lot_size)) * 100
 
     def save(self, *args, **kwargs):
+        old_trade = None
+
+        if self.pk:
+            old_trade = Trade.objects.get(pk=self.pk)
+
         if self.status == 'CLOSED' and self.entry_price is not None: #ONLY RUNS IF TRADE IS CLOSED AND Exit price exists
             self.profit_loss = self.calculate_profit_loss()
             self.percentage_return = self.calculate_percentage_returns()
 
         super().save(*args, **kwargs) #Django save method
+
+        # Only update balance the first time the trade becomes CLOSED
+        if self.status == 'CLOSED' and self.profit_loss is not None:
+            already_closed = old_trade and old_trade.status == 'CLOSED'
+
+        if not already_closed:
+            old_balance = self.trader.current_balance
+            new_balance = old_balance + self.profit_loss
+
+            self.trader.current_balance = new_balance
+            self.trader.save()
+
+            BalanceHistory.objects.create(
+                user=self.trader,
+                related_trade=self,
+                old_balance=old_balance,
+                new_balance=new_balance,
+                change_amount=self.profit_loss,
+                change_type='TRADE_RESULT',
+                reason=f'Trade result from {self.asset.symbol} {self.trade_type}'
+            )
 
 class BalanceHistory(models.Model):
     CHANGE_TYPE_CHOICES = [

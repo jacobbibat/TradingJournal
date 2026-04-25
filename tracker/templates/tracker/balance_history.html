@@ -1,35 +1,103 @@
-<h1>Balance History</h1>
+{% extends 'tracker/base.html' %}
 
-<p>
-    <a href="{% url 'update_balance' %}">Update Balance</a>
-</p>
+{% block content %}
 
-<p>
-    <a href="{% url 'trade_list' %}">Back to Trade History</a>
-</p>
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">Balance History</h1>
+        <p class="text-slate-500 mt-1">Track all changes to your account balance.</p>
+    </div>
 
-{% if history %}
-    <table border="1">
-        <tr>
-            <th>Date</th>
-            <th>Old Balance</th>
-            <th>New Balance</th>
-            <th>Change</th>
-            <th>Type</th>
-            <th>Reason</th>
-        </tr>
+    <a href="{% url 'update_balance' %}"
+       class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-center">
+        + Update Balance
+    </a>
+</div>
 
-        {% for item in history %}
-        <tr>
-            <td>{{ item.created_at }}</td>
-            <td>{{ item.old_balance }}</td>
-            <td>{{ item.new_balance }}</td>
-            <td>{{ item.change_amount }}</td>
-            <td>{{ item.change_type }}</td>
-            <td>{{ item.reason }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>No balance changes have been recorded yet.</p>
-{% endif %}
+<div class="mb-6">
+    <a href="{% url 'trade_list' %}"
+       class="text-sm text-blue-600 hover:underline">
+        ← Back to Trade History
+    </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+
+    {% if history %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="text-left p-4">Date</th>
+                        <th class="text-left p-4">Old Balance</th>
+                        <th class="text-left p-4">New Balance</th>
+                        <th class="text-left p-4">Change</th>
+                        <th class="text-left p-4">Type</th>
+                        <th class="text-left p-4">Reason</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in history %}
+                    <tr class="border-t hover:bg-slate-50">
+
+                        <td class="p-4">
+                            {{ item.created_at|date:"Y-m-d H:i" }}
+                        </td>
+
+                        <td class="p-4">
+                            {{ item.old_balance }}
+                        </td>
+
+                        <td class="p-4 font-medium">
+                            {{ item.new_balance }}
+                        </td>
+
+                        <!-- Change (with color) -->
+                        <td class="p-4
+                            {% if item.change_amount > 0 %}
+                                text-green-600
+                            {% elif item.change_amount < 0 %}
+                                text-red-600
+                            {% endif %}
+                        ">
+                            {{ item.change_amount }}
+                        </td>
+
+                        <!-- Type badge -->
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium
+                                {% if item.change_type == 'DEPOSIT' %}
+                                    bg-green-100 text-green-700
+                                {% elif item.change_type == 'WITHDRAWAL' %}
+                                    bg-red-100 text-red-700
+                                {% else %}
+                                    bg-slate-100 text-slate-700
+                                {% endif %}
+                            ">
+                                {{ item.change_type }}
+                            </span>
+                        </td>
+
+                        <td class="p-4 text-slate-600">
+                            {{ item.reason }}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    {% else %}
+        <div class="p-10 text-center text-slate-500">
+            <p class="text-lg">No balance changes yet</p>
+            <p class="text-sm mt-1">Your balance updates will appear here.</p>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

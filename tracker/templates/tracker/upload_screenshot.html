@@ -1,14 +1,39 @@
-<h1>Upload Trade Screenshot</h1>
+{% extends 'tracker/base.html' %}
 
-<p>{{ trade.asset.symbol }} - {{ trade.trade_type }}</p>
+{% block content %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
+<div class="min-h-[70vh] flex items-center justify-center">
 
-    <button type="submit">Upload Screenshot</button>
-</form>
+    <div class="bg-white border-2 border-slate-300 rounded-xl shadow p-8 w-full max-w-md">
 
-<p>
-    <a href="{% url 'trade_detail' trade.id %}">Back to Trade</a>
-</p>
+        <h1 class="text-2xl font-bold text-center mb-4">
+            Upload Screenshot
+        </h1>
+
+        <p class="text-center text-slate-500 mb-6">
+            {{ trade.asset.symbol }} - {{ trade.trade_type }}
+        </p>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit"
+                class="w-full bg-slate-900 text-white py-2 rounded-lg hover:bg-slate-700 transition">
+                Upload Screenshot
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="{% url 'trade_detail' trade.id %}"
+               class="text-sm text-blue-600 hover:underline">
+                ← Back to Trade
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,22 +1,58 @@
-<h1>Performance Dashboard</h1>
+{% extends 'tracker/base.html' %}
 
-<p><a href="{% url 'trade_list' %}">Back to Trade History</a></p>
+{% block content %}
 
-<h2>Summary</h2>
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-slate-900">Performance Dashboard</h1>
+    <p class="text-slate-500 mt-1">Overview of your trading performance.</p>
+</div>
 
-<ul>
-    <li>Total Trades: {{ total_trades }}</li>
-    <li>Closed Trades: {{ closed_trades }}</li>
-    <li>Winning Trades: {{ winning_trades }}</li>
-    <li>Losing Trades: {{ losing_trades }}</li>
-    <li>Total Profit/Loss: {{ total_profit_loss }}</li>
-    <li>Win Rate: {{ win_rate }}%</li>
-</ul>
+<a href="{% url 'trade_list' %}"
+   class="inline-block mb-6 text-sm text-blue-600 hover:underline">
+    ← Back to Trade History
+</a>
 
-<!-- Script for Chart -->
- <h2>Win / Loss Chart</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
-<canvas id="winLossChart" width="400" height="200"></canvas>
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <p class="text-sm text-slate-500">Total Trades</p>
+        <h2 class="text-3xl font-bold mt-2">{{ total_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <p class="text-sm text-slate-500">Closed Trades</p>
+        <h2 class="text-3xl font-bold mt-2">{{ closed_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <p class="text-sm text-slate-500">Win Rate</p>
+        <h2 class="text-3xl font-bold mt-2">{{ win_rate }}%</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <p class="text-sm text-slate-500">Winning Trades</p>
+        <h2 class="text-3xl font-bold mt-2 text-green-600">{{ winning_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <p class="text-sm text-slate-500">Losing Trades</p>
+        <h2 class="text-3xl font-bold mt-2 text-red-600">{{ losing_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-6">
+        <p class="text-sm text-slate-500">Total Profit/Loss</p>
+        <h2 class="text-3xl font-bold mt-2">{{ total_profit_loss|floatformat:2 }}</h2>
+    </div>
+
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border p-6">
+    <h2 class="text-xl font-semibold mb-4">Win / Loss Chart</h2>
+
+    <div class="max-w-md mx-auto">
+        <canvas id="winLossChart" width="400" height="200"></canvas>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -36,3 +72,5 @@
         }
     });
 </script>
+
+{% endblock %}

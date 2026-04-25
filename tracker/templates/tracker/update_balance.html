@@ -1,16 +1,43 @@
-<h1>Update Balance</h1>
+{% extends 'tracker/base.html' %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+{% block content %}
 
-    <button type="submit">Update Balance</button>
-</form>
+<div class="min-h-[70vh] flex items-center justify-center">
 
-<p>
-    <a href="{% url 'balance_history' %}">View Balance History</a>
-</p>
+    <div class="bg-white shadow-sm border rounded-xl p-8 w-full max-w-md">
 
-<p>
-    <a href="{% url 'trade_list' %}">Back to Trade History</a>
-</p>
+        <h1 class="text-2xl font-bold text-center mb-6">
+            Update Balance
+        </h1>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit"
+                class="w-full bg-slate-900 text-white py-2 rounded-lg hover:bg-slate-700 transition">
+                Update Balance
+            </button>
+        </form>
+
+        <!-- Links -->
+        <div class="mt-6 text-center space-y-2">
+
+            <a href="{% url 'balance_history' %}"
+               class="block text-sm text-blue-600 hover:underline">
+                View Balance History
+            </a>
+
+            <a href="{% url 'trade_list' %}"
+               class="block text-sm text-slate-500 hover:underline">
+                ← Back to Trade History
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

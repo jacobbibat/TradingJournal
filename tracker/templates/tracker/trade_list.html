@@ -1,99 +1,182 @@
-<h1>Trade History</h1>
+{% extends 'tracker/base.html' %}
 
-<p>
-    <a href="{% url 'dashboard' %}">Performance Dashboard</a>
-</p>
+{% block content %}
 
-<p>
-    Current Balance: {{ request.user.current_balance }}
-</p>
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">Trade History</h1>
+        <p class="text-slate-500 mt-1">View, filter, and manage your logged trades.</p>
+    </div>
 
-<p>
-    <a href="{% url 'update_balance' %}">Update Balance</a>
-</p>
+    <a href="{% url 'trade_create' %}"
+       class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-center">
+        + Log New Trade
+    </a>
+</div>
 
-<p>
-    <a href="{% url 'balance_history' %}">Balance History</a>
-</p>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
 
-<p>
-    <a href="{% url 'public_trades' %}">View Public Trades</a>
-</p>
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+        <p class="text-sm text-slate-500">Current Balance</p>
+        <h2 class="text-2xl font-bold mt-1">{{ request.user.current_balance }}</h2>
+    </div>
 
-<p>
-    <a href="{% url 'trade_create' %}">Log New Trade</a>
-</p>
+    <a href="{% url 'dashboard' %}"
+       class="bg-white rounded-xl shadow-sm border p-4 hover:bg-slate-50">
+        <p class="font-semibold">Dashboard</p>
+        <p class="text-sm text-slate-500">View performance</p>
+    </a>
 
+    <a href="{% url 'update_balance' %}"
+       class="bg-white rounded-xl shadow-sm border p-4 hover:bg-slate-50">
+        <p class="font-semibold">Update Balance</p>
+        <p class="text-sm text-slate-500">Add new balance</p>
+    </a>
 
-<form method="get">
-    <label>Asset:</label>
-    <input type="text" name="asset" value="{{ selected_asset|default:'' }}" placeholder="GBPUSD">
+    <a href="{% url 'balance_history' %}"
+       class="bg-white rounded-xl shadow-sm border p-4 hover:bg-slate-50">
+        <p class="font-semibold">Balance History</p>
+        <p class="text-sm text-slate-500">Track changes</p>
+    </a>
 
-    <label>Type:</label>
-    <select name="trade_type">
-        <option value="">All</option>
-        <option value="BUY" {% if selected_trade_type == "BUY" %}selected{% endif %}>Buy</option>
-        <option value="SELL" {% if selected_trade_type == "SELL" %}selected{% endif %}>Sell</option>
-    </select>
+</div>
 
-    <label>Status:</label>
-    <select name="status">
-        <option value="">All</option>
-        <option value="OPEN" {% if selected_status == "OPEN" %}selected{% endif %}>Open</option>
-        <option value="CLOSED" {% if selected_status == "CLOSED" %}selected{% endif %}>Closed</option>
-    </select>
+<div class="mb-6 flex flex-wrap gap-3">
+    <a href="{% url 'public_trades' %}"
+       class="text-sm bg-white border px-4 py-2 rounded-lg hover:bg-slate-50">
+        View Public Trades
+    </a>
 
-    <label>Visibility:</label>
-    <select name="visibility">
-        <option value="">All</option>
-        <option value="PRIVATE" {% if selected_visibility == "PRIVATE" %}selected{% endif %}>Private</option>
-        <option value="PUBLIC" {% if selected_visibility == "PUBLIC" %}selected{% endif %}>Public</option>
-    </select>
+    <a href="{% url 'monthly_summary' %}"
+       class="text-sm bg-white border px-4 py-2 rounded-lg hover:bg-slate-50">
+        Monthly Summary
+    </a>
+</div>
 
-    <button type="submit">Filter</button>
-    <a href="{% url 'trade_list' %}">Clear</a>
+<div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4">Filter Trades</h2>
 
-    <label>Start Date:</label>
-    <input type="date" name="start_date" value="{{ selected_start_date|default:'' }}">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-    <label>End Date:</label>
-    <input type="date" name="end_date" value="{{ selected_end_date|default:'' }}">
-</form>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Asset</label>
+            <input type="text"
+                   name="asset"
+                   value="{{ selected_asset|default:'' }}"
+                   placeholder="GBPUSD"
+                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
 
-<p>
-    <a href="{% url 'monthly_summary' %}">Monthly Summary</a>
-</p>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Type</label>
+            <select name="trade_type"
+                    class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+                <option value="">All</option>
+                <option value="BUY" {% if selected_trade_type == "BUY" %}selected{% endif %}>Buy</option>
+                <option value="SELL" {% if selected_trade_type == "SELL" %}selected{% endif %}>Sell</option>
+            </select>
+        </div>
 
-{% if trades %}
-    <table border="1">
-        <tr>
-            <th>Trader</th>
-            <th>Asset</th>
-            <th>Type</th>
-            <th>Entry</th>
-            <th>Exit</th>
-            <th>Profit/Loss</th>
-            <th>Status</th>
-        </tr>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+            <select name="status"
+                    class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+                <option value="">All</option>
+                <option value="OPEN" {% if selected_status == "OPEN" %}selected{% endif %}>Open</option>
+                <option value="CLOSED" {% if selected_status == "CLOSED" %}selected{% endif %}>Closed</option>
+            </select>
+        </div>
 
-        {% for trade in trades %}
-        <tr>
-            <td>{{ trade.trader.username }}</td>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Visibility</label>
+            <select name="visibility"
+                    class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+                <option value="">All</option>
+                <option value="PRIVATE" {% if selected_visibility == "PRIVATE" %}selected{% endif %}>Private</option>
+                <option value="PUBLIC" {% if selected_visibility == "PUBLIC" %}selected{% endif %}>Public</option>
+            </select>
+        </div>
 
-            <td>
-                <a href="{% url 'trade_detail' trade.id %}">
-                    {{ trade.asset.symbol }}
-                </a>
-            </td>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
+            <input type="date"
+                   name="start_date"
+                   value="{{ selected_start_date|default:'' }}"
+                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
 
-            <td>{{ trade.trade_type }}</td>
-            <td>{{ trade.entry_price }}</td>
-            <td>{{ trade.exit_price }}</td>
-            <td>{{ trade.profit_loss }}</td>
-            <td>{{ trade.status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>No trades have been logged yet.</p>
-{% endif %}
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+            <input type="date"
+                   name="end_date"
+                   value="{{ selected_end_date|default:'' }}"
+                   class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
+
+        <div class="flex items-end gap-2">
+            <button type="submit"
+                    class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700">
+                Filter
+            </button>
+
+            <a href="{% url 'trade_list' %}"
+               class="border px-4 py-2 rounded-lg hover:bg-slate-50">
+                Clear
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+    <div class="p-6 border-b">
+        <h2 class="text-xl font-semibold">Trades</h2>
+    </div>
+
+    {% if trades %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="text-left p-4">Trader</th>
+                        <th class="text-left p-4">Asset</th>
+                        <th class="text-left p-4">Type</th>
+                        <th class="text-left p-4">Entry</th>
+                        <th class="text-left p-4">Exit</th>
+                        <th class="text-left p-4">Profit/Loss</th>
+                        <th class="text-left p-4">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for trade in trades %}
+                    <tr class="border-t hover:bg-slate-50">
+                        <td class="p-4">{{ trade.trader.username }}</td>
+
+                        <td class="p-4 font-medium">
+                            <a href="{% url 'trade_detail' trade.id %}"
+                               class="text-blue-600 hover:underline">
+                                {{ trade.asset.symbol }}
+                            </a>
+                        </td>
+
+                        <td class="p-4">{{ trade.trade_type }}</td>
+                        <td class="p-4">{{ trade.entry_price }}</td>
+                        <td class="p-4">{{ trade.exit_price }}</td>
+                        <td class="p-4">{{ trade.profit_loss }}</td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                                {{ trade.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="p-6 text-slate-500">No trades have been logged yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

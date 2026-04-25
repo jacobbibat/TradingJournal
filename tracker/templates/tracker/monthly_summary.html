@@ -1,49 +1,123 @@
-<h1>Monthly Summary</h1>
+{% extends 'tracker/base.html' %}
 
-<form method="get">
-    <label>Month:</label>
-    <input type="number" name="month" min="1" max="12" value="{{ month }}">
+{% block content %}
 
-    <label>Year:</label>
-    <input type="number" name="year" value="{{ year }}">
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-slate-900">Monthly Summary</h1>
+    <p class="text-slate-500 mt-1">Analyse your trading performance by month.</p>
+</div>
 
-    <button type="submit">View Summary</button>
-</form>
+<!-- FILTER CARD -->
+<div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
 
-<h2>Summary for {{ month }}/{{ year }}</h2>
+    <form method="get" class="flex flex-wrap gap-4 items-end">
 
-<ul>
-    <li>Total Closed Trades: {{ total_trades }}</li>
-    <li>Winning Trades: {{ winning_trades }}</li>
-    <li>Losing Trades: {{ losing_trades }}</li>
-    <li>Total Profit/Loss: {{ total_profit_loss }}</li>
-    <li>Win Rate: {{ win_rate }}%</li>
-</ul>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Month</label>
+            <input type="number"
+                   name="month"
+                   min="1"
+                   max="12"
+                   value="{{ month }}"
+                   class="border rounded-lg px-3 py-2 w-24 focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
 
-<h2>Trades</h2>
+        <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Year</label>
+            <input type="number"
+                   name="year"
+                   value="{{ year }}"
+                   class="border rounded-lg px-3 py-2 w-32 focus:outline-none focus:ring-2 focus:ring-slate-400">
+        </div>
 
-{% if trades %}
-    <table border="1">
-        <tr>
-            <th>Date</th>
-            <th>Asset</th>
-            <th>Type</th>
-            <th>Profit/Loss</th>
-        </tr>
+        <button type="submit"
+                class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700">
+            View Summary
+        </button>
 
-        {% for trade in trades %}
-        <tr>
-            <td>{{ trade.trade_date }}</td>
-            <td>{{ trade.asset.symbol }}</td>
-            <td>{{ trade.trade_type }}</td>
-            <td>{{ trade.profit_loss }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-{% else %}
-    <p>No closed trades found for this month.</p>
-{% endif %}
+    </form>
 
-<p>
-    <a href="{% url 'trade_list' %}">Back to Trade History</a>
-</p>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+        <p class="text-sm text-slate-500">Closed Trades</p>
+        <h2 class="text-2xl font-bold mt-1">{{ total_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+        <p class="text-sm text-slate-500">Winning</p>
+        <h2 class="text-2xl font-bold mt-1 text-green-600">{{ winning_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+        <p class="text-sm text-slate-500">Losing</p>
+        <h2 class="text-2xl font-bold mt-1 text-red-600">{{ losing_trades }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+        <p class="text-sm text-slate-500">Profit/Loss</p>
+        <h2 class="text-2xl font-bold mt-1">{{ total_profit_loss|floatformat:2 }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border p-4">
+        <p class="text-sm text-slate-500">Win Rate</p>
+        <h2 class="text-2xl font-bold mt-1">{{ win_rate }}%</h2>
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+
+    <div class="p-6 border-b">
+        <h2 class="text-xl font-semibold">
+            Trades for {{ month }}/{{ year }}
+        </h2>
+    </div>
+
+    {% if trades %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+
+                <thead class="bg-slate-50 text-slate-600">
+                    <tr>
+                        <th class="text-left p-4">Date</th>
+                        <th class="text-left p-4">Asset</th>
+                        <th class="text-left p-4">Type</th>
+                        <th class="text-left p-4">Profit/Loss</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for trade in trades %}
+                    <tr class="border-t hover:bg-slate-50">
+                        <td class="p-4">{{ trade.trade_date }}</td>
+                        <td class="p-4 font-medium">{{ trade.asset.symbol }}</td>
+                        <td class="p-4">{{ trade.trade_type }}</td>
+                        <td class="p-4">{{ trade.profit_loss }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    {% else %}
+        <p class="p-6 text-slate-500">
+            No closed trades found for this month.
+        </p>
+    {% endif %}
+
+</div>
+
+<!-- BACK LINK -->
+<div class="mt-6">
+    <a href="{% url 'trade_list' %}"
+       class="text-blue-600 hover:underline text-sm">
+        ← Back to Trade History
+    </a>
+</div>
+
+{% endblock %}
