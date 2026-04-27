@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3x)x0p3y2ot%s2*+dk@eq=sb7hz)0f33f&1qn5*e#g-k$j0zv$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["jacobbibat24.pythonanywhere.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["jacobbibat2.pythonanywhere.com", "127.0.0.1"]
 
 # Registration links
 LOGIN_URL = '/login/'
