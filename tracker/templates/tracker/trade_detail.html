@@ -187,15 +187,17 @@
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-semibold">Analyst Reviews</h2>
 
-        <a href="{% url 'review_trade' trade.id %}"
-           class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-sm">
-            Review this Trade
-        </a>
+        {% if user.role == 'ANALYST' %}
+            <a href="{% url 'review_trade' trade.id %}"
+               class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-sm">
+                Review this Trade
+            </a>
+        {% endif %}
     </div>
 
-    {% if trade.reviews.all %}
+    {% if reviews %}
         <div class="space-y-4">
-            {% for review in trade.reviews.all %}
+            {% for review in reviews %}
                 <div class="border border-slate-300 rounded-lg p-4 bg-slate-50">
                     <p class="font-semibold">
                         {{ review.analyst.username }}

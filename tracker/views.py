@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Trade, BalanceHistory, Asset, TradeScreenshot
+from .models import Trade, BalanceHistory, Asset, TradeScreenshot, TradeReview
 from .forms import TradeForm, CommentForm, TradeReviewForm, BalanceUpdateForm, RegisterForm, AssetForm, TradeScreenshotForm
 from django.db.models import Sum
 from django.utils import timezone
@@ -70,8 +70,15 @@ def trade_detail(request, trade_id):
     trade = get_object_or_404(Trade, id=trade_id)
     comments = trade.comments.all().order_by('-created_at')
 
-    if trade.visibility == 'PRIVATE' and trade.trader != request.user: #Only visible to owner if private
+
+    # Restrict private trades
+    if trade.visibility == 'PRIVATE' and trade.trader != request.user:
         return redirect('trade_list')
+
+    if trade.trader == request.user or request.user.role == 'ANALYST':
+        reviews = trade.reviews.all().order_by('-created_at')
+    else:
+        reviews = trade.reviews.filter(review_type='PUBLIC').order_by('-created_at')
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -89,6 +96,7 @@ def trade_detail(request, trade_id):
         'trade': trade,
         'comments': comments,
         'form': form,
+        'reviews' : reviews,
     })
 # Method to create a trade , after save, redirects trade_detail
 @login_required
