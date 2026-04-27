@@ -11,7 +11,19 @@ from .models import (
     TradeReview
 )
 
-admin.site.register(User, UserAdmin)
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        ('Custom Fields', {
+            'fields': ('role', 'current_balance'),
+        }),
+    )
+
+    list_display = ('username', 'email', 'role', 'current_balance', 'is_staff')
+    list_filter = ('role', 'is_staff')
+
+
+# Other models
 admin.site.register(Asset)
 admin.site.register(Trade)
 admin.site.register(BalanceHistory)
